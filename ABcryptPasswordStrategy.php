@@ -6,6 +6,9 @@
  * @author Charles Pick
  * @package packages.passwordStrategy
  */
+
+namespace mekegi\YiiPassword;
+
 class ABcryptPasswordStrategy extends APasswordStrategy
 {
 	/**

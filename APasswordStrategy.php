@@ -11,7 +11,10 @@
  * @package packages.passwordStrategy
  * @author Charles Pick
  */
-abstract class APasswordStrategy extends CValidator {
+
+namespace mekegi\YiiPassword;
+
+abstract class APasswordStrategy extends \CValidator {
 
 	/**
 	 * The name of this password strategy

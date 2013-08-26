@@ -33,7 +33,10 @@
  * @author Charles Pick
  * @package packages.passwordStrategy
  */
-class APasswordBehavior extends CActiveRecordBehavior {
+
+namespace mekegi\YiiPassword;
+
+class APasswordBehavior extends \CActiveRecordBehavior {
 	/**
 	 * The name of the attribute that contains the password salt
 	 * @var string
@@ -104,7 +107,7 @@ class APasswordBehavior extends CActiveRecordBehavior {
 	{
 		foreach($strategies as $name => $strategy) {
 			if (!($strategy instanceof APasswordStrategy)) {
-				$strategy = Yii::createComponent($strategy);
+				$strategy = \Yii::createComponent($strategy);
 			}
 			$strategy->name = $name;
 			$strategies[$name] = $strategy;
@@ -155,38 +158,38 @@ class APasswordBehavior extends CActiveRecordBehavior {
 	public function verifyPassword($password)
 	{
 		$owner = $this->getOwner(); /* @var CActiveRecord $owner */
-		$strategy = $this->getStrategy();
-		if ($strategy === false) {
-			return false; // no strategy
-		}
-		if ($this->saltAttribute) {
-			$strategy->setSalt($owner->{$this->saltAttribute});
-		}
-		if (!$strategy->compare($password,$owner->{$this->passwordAttribute})) {
-			return false;
-		}
-		if ($this->autoUpgrade && $strategy->name != $this->defaultStrategyName) {
-			if (!$this->changePassword($password,!$strategy->canUpgradeTo($this->getDefaultStrategy()))) {
-				// couldn't upgrade their password, so ask them for a new password
-				$owner->saveAttributes(array(
-					$this->requireNewPasswordAttribute => true
-				));
-			}
-		}
-		return true;
+
+        foreach( $this->getStrategies() as $strategy) {
+            if ($this->saltAttribute) {
+                $strategy->setSalt($owner->{$this->saltAttribute});
+            }
+            if (!$strategy->compare($password,$owner->{$this->passwordAttribute})) {
+                continue;
+            }
+            if ($this->autoUpgrade && $strategy->name != $this->defaultStrategyName) {
+                if (!$this->changePassword($password,!$strategy->canUpgradeTo($this->getDefaultStrategy()))) {
+                    // couldn't upgrade their password, so ask them for a new password
+                    $owner->saveAttributes(array(
+                        $this->requireNewPasswordAttribute => true
+                    ));
+                }
+            }
+            return true;
+        }
+		return false;
 	}
 
     /**
      * Changes the user's password and saves the record
      * @param string $newPassword the plain text password to change to
      * @param boolean $runValidation whether to run validation or not.
-     * If validate false, return false, and {UserModel} hasError(password).
+     * If validate false, return false, and {\UserModel} hasError(password).
      * @return boolean true if the password was changed successfully
      */
     public function changePassword($newPassword, $runValidation = true)
     {
         $owner = $this->getOwner();
-        /* @var CActiveRecord $owner UserModel */
+        /* @var \CActiveRecord $owner \UserModel */
         if ($runValidation) {
             $owner->{$this->passwordAttribute} = $newPassword;
             if ($owner->validate($this->passwordAttribute) === false) {
@@ -205,7 +208,7 @@ class APasswordBehavior extends CActiveRecordBehavior {
 	 */
 	public function getPasswordResetCode()
 	{
-		$owner = $this->getOwner(); /* @var CActiveRecord $owner */
+		$owner = $this->getOwner(); /* @var \CActiveRecord $owner */
 		$salt = $this->saltAttribute ? $owner->{$this->saltAttribute} : false;
 		$password = $owner->{$this->passwordAttribute};
 		return sha1("ResetPassword:".$owner->getPrimaryKey().":".$salt.":".$password);
@@ -217,7 +220,7 @@ class APasswordBehavior extends CActiveRecordBehavior {
 	 */
 	protected function changePasswordInternal($password)
 	{
-		$owner = $this->getOwner(); /* @var CActiveRecord $owner */
+		$owner = $this->getOwner(); /* @var \CActiveRecord $owner */
 		if ($this->autoUpgrade) {
 			$strategy = $this->getDefaultStrategy();
 		}
@@ -258,7 +261,7 @@ class APasswordBehavior extends CActiveRecordBehavior {
 	/**
 	 * Invoked before the model is validated.
 	 * Validates the password first
-	 * @param CModelEvent $event the raised event
+	 * @param \CModelEvent $event the raised event
 	 */
 	public function beforeValidate($event)
 	{

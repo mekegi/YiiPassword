@@ -8,6 +8,10 @@
  * @author Charles Pick
  * @package packages.passwordStrategy
  */
+
+namespace mekegi\YiiPassword;
+
+
 class ALegacySha1PasswordStrategy extends APasswordStrategy {
 	/**
 	 * Encode a plain text password.
